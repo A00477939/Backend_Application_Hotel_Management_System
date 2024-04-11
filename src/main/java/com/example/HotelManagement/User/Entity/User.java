@@ -1,4 +1,4 @@
-package com.example.HotelManagement.Hotel.Entity;
+package com.example.HotelManagement.User.Entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,14 +14,11 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-@Table(name = "Hotels")
-public class Hotel {
-
+@Table(name = "Users")
+public class User {
     @Id
-    @Column(name = "hotel_id")
+    @Column(name = "user_id")
     private String Id;
-    @Column(name ="hotel_name")
+    @Column(name ="name")
     private String Name;
-    @Column(name ="price")
-    private String price;
 }
