@@ -17,10 +17,9 @@ public class ReservationContoller {
     }
 
     @PostMapping("/hotel")
-    public ResponseEntity<ReservationRequest> addUserWithAddress(@RequestBody ReservationRequest request) {
-       // reservationService.createReservation(request);
-      //  return ResponseEntity.ok("User and address added successfully");
-        return ResponseEntity.ok(request);
+    public ResponseEntity<String> addUserWithAddress(@RequestBody ReservationRequest request) {
+         String ReservationId= reservationService.createReservation(request);
+        return ResponseEntity.ok(ReservationId);
 
     }
 }
