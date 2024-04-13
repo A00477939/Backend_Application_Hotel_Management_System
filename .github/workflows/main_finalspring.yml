@@ -1,62 +1,38 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: Build and deploy JAR app to Azure Web App - FinalSpring
-
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+name: AzureSpringCloud
+on: push
+env:
+  ASC_PACKAGE_PATH: ${{ github.workspace }}
+  JAVA_VERSION: 17
+  AZURE_SUBSCRIPTION: c70085e6-c3ce-4d50-b40c-d03cb762d680
 
 jobs:
-  build:
-    runs-on: windows-latest
-
+  deploy_to_production:
+    runs-on: ubuntu-latest
+    name: deploy to production with artifact
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Java version
+      - name: Checkout Github Action
+        uses: actions/checkout@v2
+        
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v1
         with:
-          java-version: '21'
+          java-version: ${{ env.JAVA_VERSION }}
 
-      - name: Build with Maven
-        run: mvn clean install
+      - name: maven build, clean
+        run: |
+          mvn clean package -DskipTests
 
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v3
-        with:
-          name: java-app
-          path: '${{ github.workspace }}/target/*.jar'
-
-  deploy:
-    runs-on: windows-latest
-    needs: build
-    environment:
-      name: 'Production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-    permissions:
-      id-token: write #This is required for requesting the JWT
-
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v3
-        with:
-          name: java-app
-      
-      - name: Login to Azure
+      - name: Login via Azure CLI
         uses: azure/login@v1
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_FBA8EF69DD814F9DA67CD0EFA215BDDC }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_0CF1E3EA4C5B494F8123939D6BD111A8 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_DC5D567D06B44AC1BCB8E7844BEE0473 }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Deploy to Azure Web App
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
+      - name: deploy to production with artifact
+        uses: azure/spring-cloud-deploy@v1
         with:
-          app-name: 'FinalSpring'
-          slot-name: 'Production'
-          package: '*.jar'
-          
+          azure-subscription: ${{ env.AZURE_SUBSCRIPTION }}
+          action: Deploy
+          service-name: spring-blog
+          app-name: spring-blog
+          use-staging-deployment: false
+          package: ${{ env.ASC_PACKAGE_PATH }}/**/*.jar
